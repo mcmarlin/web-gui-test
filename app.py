@@ -12,7 +12,7 @@ def load_chart_data():
     df = pd.read_excel(excel_path)
 
     # Ensure expected columns exist
-    required_columns = ["subject visit id", "tissue type", "H&E_S1"]
+    required_columns = ["Subject Visit ID", "Tissue Type", "H&E_S1"]
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"Missing required column: {col}")
