@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Sample Counts</title>
+    <meta charset="UTF-8" />
+    <title>Sample Counts by Subject Visit ID & Tissue Type</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        #chart-container { width: 90%; max-width: 900px; margin: auto; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #chart-container {
+            width: 90%;
+            max-width: 900px;
+            margin: auto;
+        }
     </style>
 </head>
 <body>
@@ -50,25 +58,46 @@
         options: {
             responsive: true,
             plugins: {
-                tooltip: { mode: 'index', intersect: false },
-                legend: { position: 'top' },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                legend: {
+                    position: 'top'
+                },
                 datalabels: {
                     color: '#000',
                     anchor: 'end',
                     align: 'top',
+                    font: {
+                        weight: 'bold'
+                    },
                     formatter: value => value > 0 ? value : ''
                 }
             },
-            interaction: { mode: 'nearest', axis: 'x', intersect: false },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
             scales: {
-                x: { stacked: true },
-                y: { stacked: true, beginAtZero: true }
+                x: {
+                    stacked: true,
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45,
+                        autoSkip: false
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
             }
         },
         plugins: [ChartDataLabels]
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 </body>
 </html>
