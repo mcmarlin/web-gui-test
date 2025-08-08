@@ -67,12 +67,17 @@
                 },
                 datalabels: {
                     color: '#000',
-                    anchor: 'end',
-                    align: 'top',
                     font: {
-                        weight: 'bold'
+                        weight: 'bold',
+                        size: 10
                     },
-                    formatter: value => value > 0 ? value : ''
+                    anchor: 'end',
+                    align: 'start',
+                    offset: 4,
+                    clip: true,
+                    formatter: function(value) {
+                        return value > 0 ? value : '';
+                    }
                 }
             },
             interaction: {
