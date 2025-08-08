@@ -1,159 +1,74 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>H&E Status by Group</title>
+    <meta charset="UTF-8">
+    <title>Sample Counts</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 40px;
-            background-color: #f4f4f4;
-            margin: 0;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .chart-container {
-            width: 100%;
-            max-width: 1000px;
-            height: 500px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-        }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #chart-container { width: 90%; max-width: 900px; margin: auto; }
     </style>
 </head>
 <body>
-    <h1>H&E Status by Subject Visit Group & Tissue Type</h1>
 
-    <div class="chart-container">
-        <canvas id="stackedChart"></canvas>
-    </div>
+<h2>Sample Counts by Subject Visit ID & Tissue Type</h2>
 
-    <script>
-        const ctx = document.getElementById('stackedChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {{ chart_data.labels|tojson }},
-                datasets: [
-                    {
-                        label: 'Done',
-                        data: {{ chart_data.done|tojson }},
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderRadius: 4,
-                        borderSkipped: false
-                    },
-                    {
-                        label: 'Not-Done',
-                        data: {{ chart_data.not_done|tojson }},
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                        borderRadius: 4,
-                        borderSkipped: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Stacked Bar Chart of H&E Completion Status',
-                        font: {
-                            size: 20
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.raw}`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        color: '#222',
-                        anchor: 'center',
-                        align: 'center',
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        },
-                        formatter: function(value) {
-                            return value > 0 ? value : '';
-                        }
-                    }
+{% if error_message %}
+<script>
+    alert("{{ error_message }}");
+</script>
+{% endif %}
+
+<div id="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script>
+    const rawData = {{ chart_data | tojson }};
+    const labels = Object.keys(rawData);
+    const doneCounts = labels.map(label => rawData[label].Done);
+    const notDoneCounts = labels.map(label => rawData[label]["Not-Done"]);
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Done',
+                    data: doneCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
                 },
-                scales: {
-                    x: {
-                        stacked: true,
-                        title: {
-                            display: true,
-                            text: 'Subject Visit Group & Tissue Type',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            },
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 45
-                        },
-                        grid: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Sample Count',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        },
-                        grid: {
-                            color: '#e0e0e0'
-                        }
-                    }
+                {
+                    label: 'Not-Done',
+                    data: notDoneCounts,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: { mode: 'index', intersect: false },
+                legend: { position: 'top' },
+                datalabels: {
+                    color: '#000',
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: value => value > 0 ? value : ''
                 }
             },
-            plugins: [ChartDataLabels]
-        });
-    </script>
+            interaction: { mode: 'nearest', axis: 'x', intersect: false },
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
 </body>
 </html>
