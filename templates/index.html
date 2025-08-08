@@ -46,12 +46,34 @@
                 {
                     label: 'Done',
                     data: doneCounts,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'start',
+                        offset: 4,
+                        color: '#000',
+                        font: {
+                            weight: 'bold',
+                            size: 10
+                        },
+                        formatter: value => value > 0 ? value : ''
+                    }
                 },
                 {
                     label: 'Not-Done',
                     data: notDoneCounts,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        offset: -6,
+                        color: '#000',
+                        font: {
+                            weight: 'bold',
+                            size: 10
+                        },
+                        formatter: value => value > 0 ? value : ''
+                    }
                 }
             ]
         },
@@ -64,20 +86,6 @@
                 },
                 legend: {
                     position: 'top'
-                },
-                datalabels: {
-                    color: '#000',
-                    font: {
-                        weight: 'bold',
-                        size: 10
-                    },
-                    anchor: 'end',
-                    align: 'start',
-                    offset: 4,
-                    clip: true,
-                    formatter: function(value) {
-                        return value > 0 ? value : '';
-                    }
                 }
             },
             interaction: {
