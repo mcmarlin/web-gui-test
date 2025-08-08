@@ -23,7 +23,7 @@ def load_chart_data():
 
     # Prepare chart data
     charts = []
-    for tissue_type, group in df.groupby("tissue type"):
+    for tissue_type, group in df.groupby("Tissue Type"):
         counts = defaultdict(int)
         for _, row in group.iterrows():
             counts[row["H&E_S1"]] += 1
