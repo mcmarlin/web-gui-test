@@ -1,6 +1,10 @@
 from flask import Flask, render_template
 import pandas as pd
+import os
 
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))  # Use Render's port or default to 5000 locally
+    app.run(host='0.0.0.0', port=port)
 app = Flask(__name__)
 
 @app.route('/')
@@ -41,4 +45,5 @@ def index():
     return render_template("index.html", chart_data=chart_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use Render's port or default to 5000 locally
+    app.run(host='0.0.0.0', port=port)
