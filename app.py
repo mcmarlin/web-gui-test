@@ -1,49 +1,56 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import pandas as pd
 import os
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use Render's port or default to 5000 locally
-    app.run(host='0.0.0.0', port=port)
 app = Flask(__name__)
 
-@app.route('/')
+# Load the spreadsheet
+def load_data(file_path):
+    df = pd.read_excel(file_path)
+
+    # Create a new column for the first digit of Subject Visit ID
+    df["VisitPrefix"] = df["Subject Visit ID"].astype(str).str[0]
+
+    # Group by VisitPrefix, Tissue Type, and H&E_S1
+    grouped = (
+        df.groupby(["VisitPrefix", "Tissue Type", "H&E_S1"])
+        .size()
+        .reset_index(name="Count")
+    )
+
+    return grouped
+
+@app.route("/")
 def index():
-    df = pd.read_excel("data.xlsx")
+    return render_template("index.html")
 
-    # Filter rows starting with 4, 5, 6, or 7
-    df['Subject Visit ID'] = df['Subject Visit ID'].astype(str)
-    df_filtered = df[df['Subject Visit ID'].str.startswith(('4','5','6','7'))]
+@app.route("/data")
+def data():
+    file_path = "data.xlsx"  # Change this path if you want a different file
+    grouped = load_data(file_path)
 
-    # Classify H&E_S1 as Done/Not-Done robustly
-    def classify_status(val):
-        if isinstance(val, str) and val.strip().lower() == "done":
-            return "Done"
-        if str(val).strip() in ["1", "True", "true"]:
-            return "Done"
-        return "Not-Done"
+    # Prepare chart data
+    chart_data = {}
+    for prefix in grouped["VisitPrefix"].unique():
+        subset = grouped[grouped["VisitPrefix"] == prefix]
+        labels = subset["Tissue Type"].unique().tolist()
 
-    df_filtered['H&E_S1'] = df_filtered['H&E_S1'].apply(classify_status)
+        done_counts = []
+        not_done_counts = []
+        for label in labels:
+            done = subset[(subset["Tissue Type"] == label) & (subset["H&E_S1"] == "Done")]["Count"].sum()
+            not_done = subset[(subset["Tissue Type"] == label) & (subset["H&E_S1"] == "Not-Done")]["Count"].sum()
+            done_counts.append(done)
+            not_done_counts.append(not_done)
 
-    # Group by first digit of Subject Visit ID + Tissue Type
-    df_filtered['Group'] = df_filtered['Subject Visit ID'].str[0] + " - " + df_filtered['Tissue Type']
+        chart_data[prefix] = {
+            "labels": labels,
+            "done": done_counts,
+            "not_done": not_done_counts
+        }
 
-    # Count Done/Not-Done for each group
-    pivot = df_filtered.pivot_table(index='Group', columns='H&E_S1', aggfunc='size', fill_value=0)
+    return jsonify(chart_data)
 
-    if "Done" not in pivot.columns:
-        pivot["Done"] = 0
-    if "Not-Done" not in pivot.columns:
-        pivot["Not-Done"] = 0
-
-    chart_data = {
-        'labels': list(pivot.index),
-        'done': list(pivot["Done"]),
-        'not_done': list(pivot["Not-Done"])
-    }
-
-    return render_template("index.html", chart_data=chart_data)
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use Render's port or default to 5000 locally
-    app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render will set PORT
+    app.run(host="0.0.0.0", port=port)
